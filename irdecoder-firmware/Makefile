@@ -7,7 +7,7 @@ CC = avr-gcc
 OBJCOPY = avr-objcopy
 CFLAGS += -Iusbdrv/ -Wall -g -Os -mmcu=$(MCU)
 
-SOURCE = irdecoder.c
+SOURCE = irdecoder.c nec.c
 
 all:
 	avr-gcc $(CFLAGS) -o $(NAME).elf $(SOURCE)
