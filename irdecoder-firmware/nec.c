@@ -221,7 +221,7 @@ uint8_t __nec_decode_byte(uint8_t offset)
 	uint8_t addr;
 	uint8_t x;
 	uint16_t phase_end_ts;
-	for(addr = 0, x = 0; x < 9; x++) {
+	for(addr = 0, x = 1; x < 9; x++) {
 		phase_end_ts = edges[offset + (x * 2)];
 		if(phase_end_ts  > NEC_1_BIT_TRANSMIT_TIME_MIN) {
 			addr |= (1 << (8 - x));
