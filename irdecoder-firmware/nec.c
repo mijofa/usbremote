@@ -33,6 +33,8 @@ void nec_add_edge(uint16_t duration)
 {
 	if(edge_count < NEC_MAX_EDGES) {
 		edges[edge_count++] = duration;
+	} else { /* too many edges */
+		nec_reset();
 	}
 }
 
@@ -60,17 +62,21 @@ uint8_t nec_get_state(void)
  * address and command. */
 void nec_decode(void)
 {
+	/* if the edge count isnt that of a complete command or a repeat packet
+	 * then we don't no what it is. discard */
 	if(edge_count != NEC_PACKET_EDGE_COUNT || edge_count != NEC_REPEAT_PACKET_EDGE_COUNT) {
 		nec_reset();
 		return;
 	}
 
+	/* store address and command bytes here until we verify correctness.
+	 * then we can copy it to the global buffers accessed by get functions */
 	uint8_t temp_addr;
 	uint8_t temp_cmd;
 
 	uint8_t edge_index;
-	uint16_t next_edge;
 	uint16_t curr_edge;
+	uint16_t next_edge;
 	for(edge_index = 0; edge_index < edge_count; edge_index++) {
 		curr_edge = edges[edge_index];
 		next_edge = edges[edge_index + 1];
@@ -204,6 +210,7 @@ void nec_decode(void)
 				addr = temp_addr;
 				cmd = temp_cmd;
 				state = STATE_SUCCESSFUL_READ;
+				break;
 
 		}
 	}
@@ -214,8 +221,8 @@ uint8_t __nec_decode_byte(uint8_t offset)
 	uint8_t addr;
 	uint8_t x;
 	uint16_t phase_end_ts;
-	for(addr = 0, x = 0; x < 8; x++) {
-		phase_end_ts = edges[offset * x + 2];
+	for(addr = 0, x = 0; x < 9; x++) {
+		phase_end_ts = edges[offset + (x * 2)];
 		if(phase_end_ts  > NEC_1_BIT_TRANSMIT_TIME_MIN) {
 			addr |= (1 << (8 - x));
 		}
