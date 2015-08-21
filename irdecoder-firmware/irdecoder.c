@@ -30,7 +30,9 @@ ISR(TIMER1_CAPT_vect)
 
 /* 16 bit timer overflow interrupt -- rjmp's any time timer1 overflows.
  * since we are set to CLK/8 and running at 20MHz, overflow happens after
- * 26 milliseconds.
+ * 26 milliseconds. 26 milliseconds is kind of a sweet spot:
+ *      * greater than any expected high or low phase
+ *      * less than the time between a command and a repeat signal
  */
 ISR(TIMER1_OVF_vect)
 {
@@ -49,8 +51,8 @@ int main(void)
 
 	/* configure the 16 bit Timer1/Counter1 which we will use as an
 	 * input capture to measure the pulse widths of our IR signal */
-	TCCR1B = _BV(CS11)  | /* CLK/8 prescaler, meaning timer incrememt every CLK/8 Hz */
-			 _BV(ICNC1) | /* enable input capture noise canceler */
+	TCCR1B = _BV(CS11)  |   /* CLK/8 prescaler, meaning timer increment every CLK/8 Hz */
+			 _BV(ICNC1) |   /* enable input capture noise canceler */
 			 (0 << ICES1);  /* set capture edge selector to falling edge */
 
 
