@@ -1,13 +1,14 @@
 NAME = irdecoder
-MCU = attiny2313
+MCU = atmega328p
+FCPU = 20000000
 
 DRIVER = usbtiny
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
-CFLAGS += -Iusbdrv/ -Wall -g -Os -mmcu=$(MCU)
+CFLAGS += -Wall -Os -mmcu=$(MCU) -DF_CPU=$(FCPU)
 
-SOURCE = irdecoder.c nec.c
+SOURCE = irdecoder.c nec.c usart.c
 
 all:
 	avr-gcc $(CFLAGS) -o $(NAME).elf $(SOURCE)
@@ -17,7 +18,7 @@ flash:
 	sudo avrdude -c $(DRIVER) -p $(MCU) -U flash:w:$(NAME).hex
 
 fuses:
-	sudo avrdude -c $(DRIVER) -p $(MCU) -U lfuse:w:0xce:m -U hfuse:w:0xdf:m
+	sudo avrdude -c $(DRIVER) -p $(MCU) -U lfuse:w:0xde:m -U hfuse:w:0xd9:m
 
 clean:
 	rm *.elf

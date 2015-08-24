@@ -1,5 +1,10 @@
 #include <stdint.h>
+#include <stdlib.h> /* DEBUG */
+#include <avr/pgmspace.h>
 #include "nec.h"
+#include "usart.h"
+
+static const char NEWLINE[] PROGMEM = "\r\n";
 
 static uint8_t state;
 static uint8_t edge_count;
@@ -13,6 +18,7 @@ void nec_init(void)
 {
 	addr = 0;
 	cmd = 0;
+	edge_count = 0;
 	nec_reset();
 }
 
@@ -62,9 +68,10 @@ uint8_t nec_get_state(void)
  * address and command. */
 void nec_decode(void)
 {
+
 	/* if the edge count isnt that of a complete command or a repeat packet
 	 * then we don't no what it is. discard */
-	if(edge_count != NEC_PACKET_EDGE_COUNT || edge_count != NEC_REPEAT_PACKET_EDGE_COUNT) {
+	if(edge_count != NEC_PACKET_EDGE_COUNT && edge_count != NEC_REPEAT_PACKET_EDGE_COUNT) {
 		nec_reset();
 		return;
 	}
@@ -84,7 +91,7 @@ void nec_decode(void)
 		switch(state) {
 			case STATE_NONE:
 				if(next_edge >= NEC_START_PULSE_MIN && next_edge <= NEC_START_PULSE_MAX) {
-					edge_index += 2;
+					edge_index += 1; /* skip one, and the for loop will increment one more */
 					state = STATE_RECEIVED_START_PULSE;
 				} else {
 					nec_reset();
@@ -94,11 +101,19 @@ void nec_decode(void)
 
 			case STATE_RECEIVED_START_PULSE:
 				/* immediately after the start pulse there is an extended low period. if it's not there
-				 * then this signal is bad or doesn't belong to us */
+				 * then this signal is either bad, or a repeat code. repeat code has a low period half
+				 * that of a standard packet. */
+				if(edge_index + 2 == edge_count) {
+					nec_reset();
+					state = STATE_SUCCESSFUL_READ;
+					return;
+				}
+
 				if(!(curr_edge >= NEC_POST_START_PAUSE_MIN && curr_edge <= NEC_POST_START_PAUSE_MAX)) {
 					nec_reset();
 					break;
 				}
+
 
 				/* we're expecting the first bit of the address here */
 				if(!(next_edge >= NEC_BIT_PULSE_MIN && next_edge <= NEC_BIT_PULSE_MAX)) {
@@ -106,12 +121,6 @@ void nec_decode(void)
 					break;
 				}
 
-				/* since it was a bit pulse, if there is no more pulses it's a repeat signal */
-				if(edge_index + 2 > edge_count) {
-					nec_reset();
-					state = STATE_SUCCESSFUL_READ;
-					break;
-				}
 
 				/* we should be at start edge of the first bit of the 8 bit address. so if
 				 * there are less than 16 edges (8 bits) something is wrong */
@@ -122,9 +131,8 @@ void nec_decode(void)
 
 				/* decode the address byte */
 				temp_addr = __nec_decode_byte(edge_index);
-
 				state = STATE_RECEIVED_ADDRESS;
-				edge_index += 16;
+				edge_index += 15;
 				break;
 
 			case STATE_RECEIVED_ADDRESS:
@@ -145,13 +153,13 @@ void nec_decode(void)
 				 * byte we already have. if it doesn't match we have an error */
 				uint8_t inverse_addr;
 				inverse_addr = __nec_decode_byte(edge_index);
-				if(~inverse_addr != temp_addr) {
+				if((inverse_addr ^ temp_addr) == 0) {
 					nec_reset();
 					break;
 				}
 
 				state = STATE_RECEIVED_ADDR_INVERSE;
-				edge_index += 16;
+				edge_index += 15;
 				break;
 
 			case STATE_RECEIVED_ADDR_INVERSE:
@@ -172,7 +180,7 @@ void nec_decode(void)
 				temp_cmd = __nec_decode_byte(edge_index);
 
 				state = STATE_RECEIVED_COMMAND;
-				edge_index += 16;
+				edge_index += 15;
 				break;
 
 			case STATE_RECEIVED_COMMAND:
@@ -191,13 +199,13 @@ void nec_decode(void)
 
 				uint8_t inverse_cmd;
 				inverse_cmd = __nec_decode_byte(edge_index);
-				if(~inverse_cmd != temp_cmd) {
+				if((inverse_cmd ^ temp_cmd) == 0) {
 					nec_reset();
 					break;
 				}
 
 				state = STATE_RECEIVED_COMMAND_INVERSE;
-				edge_index += 16;
+				edge_index += 15;
 				break;
 
 			case STATE_RECEIVED_COMMAND_INVERSE:
@@ -219,6 +227,8 @@ void nec_decode(void)
 uint8_t __nec_decode_byte(uint8_t offset)
 {
 	uint8_t addr;
+	addr = 0;
+
 	uint8_t x;
 	uint16_t phase_end_ts;
 	for(addr = 0, x = 1; x < 9; x++) {
@@ -226,7 +236,6 @@ uint8_t __nec_decode_byte(uint8_t offset)
 		if(phase_end_ts  > NEC_1_BIT_TRANSMIT_TIME_MIN) {
 			addr |= (1 << (8 - x));
 		}
-
 	}
 
 	return addr;

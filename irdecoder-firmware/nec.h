@@ -12,7 +12,7 @@
 #define NEC_REPEAT_PACKET_EDGE_COUNT	4
 
 /* acceptable error margin to account for variations in pulse widths */
-#define NEC_PULSE_ERROR_MARGIN			.05
+#define NEC_PULSE_ERROR_MARGIN			.15
 
 /* 9ms start pulse */
 #define NEC_START_PULSE_MIN				((ONE_MS * 9) - (ONE_MS * NEC_PULSE_ERROR_MARGIN))
