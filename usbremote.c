@@ -6,7 +6,6 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include "usbdrv/usbdrv.h"
-#include "usbrequests.h"
 #include "nec.h"
 
 
@@ -46,7 +45,6 @@ ISR(TIMER1_CAPT_vect)
  *      * greater than any expected high or low phase
  *      * less than the time between a command and a repeat signal
  */
-
 ISR(TIMER1_OVF_vect)
 {
 
@@ -78,7 +76,10 @@ int main(void)
     /* intialize USB driver */
     usbInit();
 
-    /* we disconnect usb and pause for 250ms, and then connect to stabilize */
+    /* we disconnect usb and pause for 250ms, and then connect to stabilize.
+     * long explanation is: if a watchdog reset happens, the USB bus won't know it. so
+     * it will continue to address us on our old address, even though we reset. so
+     * doing this forces a re-enumeration to prevent this issue. */
     usbDeviceDisconnect();
     int t;
     for(t = 0; t < 250; t++) {
@@ -115,8 +116,8 @@ int main(void)
 
         /* if the interrupt endpoint is ready to recieve data, and a new
          * IR command is ready, set the interrupt two a 2 byte chunk:
-         * 		- byte 1: address
-         * 		- byte 2: command
+         *	- byte 1: address
+         *	- byte 2: command
          */
         if(usbInterruptIsReady() && cmd_available) {
         	uint8_t chunk[2];
