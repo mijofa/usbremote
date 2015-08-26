@@ -1,7 +1,7 @@
 NAME=usbremoted
 CC= clang
 CFLAGS += -Wall -lusb-1.0
-SOURCE = main.c
+SOURCE = usbremoted.c device.c commands.c
 
 all:
 	$(CC) $(CFLAGS) -o $(NAME) $(SOURCE)
