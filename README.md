@@ -23,4 +23,4 @@ The host software looks for a file /etc/usbremote_commands, which is expected to
 
 ###Schematic
 
-I don't have a finished schematic just yet. Coming soon.
+![usbremote schematic](http://nikharris.com/content/images/2015/08/usbremote-schematic.png)
