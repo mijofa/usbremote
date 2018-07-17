@@ -1,9 +1,23 @@
 usbremote
 =========
 
+
+
 A USB infrared receiver for NEC-compatible remotes, built using an AVR micrcontroller. Includes host software using libusb. The host software is written for linux, but can be easily adapted for any other system.
 
-###Compliation and Flashing
+Dependencies
+------------
+
+receiver firmware: gcc-avr avr-libc
+installation of firmware: avrdude
+
+host-driver: libusb-1.0-0-dev clang
+
+Can we just drop-in replace clang with gcc? Compilation works but does the resulting binary work the same way?
+
+
+Compliation and Flashing
+------------------------
 
 The firmware using avr-libc and is built using the AVR GCC toolchain. Assuming you have these installed, you can build and flash the firmware onto the device using make:
 
@@ -21,6 +35,7 @@ The host software looks for a file /etc/usbremote_commands, which is expected to
     0:reboot
 
 
-###Schematic
+Schematic
+---------
 
 ![usbremote schematic](http://nikharris.com/content/images/2015/08/usbremote-schematic.png)
