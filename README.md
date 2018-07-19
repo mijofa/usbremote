@@ -38,4 +38,9 @@ The host software looks for a file /etc/usbremote_commands, which is expected to
 Schematic
 ---------
 
-![usbremote schematic](http://nikharris.com/content/images/2015/08/usbremote-schematic.png)
+FIXME: Why is the IR reciever not exporting with the rest of the schematic?
+
+FIXME: How well does this match the [V-USB reference circuit](https://www.obdev.at/products/vusb/index.html)?
+       I think there should be some extra diodes & resistors for power smoothing.
+
+<img src="fritzing-circuit/usbremote_schem.svg" width="100%">
