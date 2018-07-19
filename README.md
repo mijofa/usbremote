@@ -11,9 +11,7 @@ Dependencies
 receiver firmware: gcc-avr avr-libc
 installation of firmware: avrdude
 
-host-driver: libusb-1.0-0-dev clang
-
-Can we just drop-in replace clang with gcc? Compilation works but does the resulting binary work the same way?
+host-driver: libusb-1.0-0-dev gcc
 
 
 Compliation and Flashing

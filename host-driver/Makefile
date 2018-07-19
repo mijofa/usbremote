@@ -1,5 +1,5 @@
 NAME=usbremoted
-CC= clang
+CC=gcc
 CFLAGS += -Wall -lusb-1.0
 SOURCE = usbremoted.c device.c commands.c
 
