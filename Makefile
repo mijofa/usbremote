@@ -1,35 +1,43 @@
-NAME = usbremote
-MCU = atmega328p
+NAME       = usbremote
 
-DRIVER = usbtiny
+CLOCK      = 20000000
+#CLOCK      = 20000000  # 20MHz
+#CLOCK      = 16000000  # 16MHz
+#CLOCK      = 8000000   # 8MHz (matches atmega328p's internal RC oscillator)
 
-CC = avr-gcc
-OBJCOPY = avr-objcopy
-CFLAGS += -Wall -g -Os -mmcu=$(MCU)
+MCU        = atmega328p
+PROGRAMMER = avrisp
+PORT       = /dev/ttyACM0
+BAUD       = 19200
 
-V_USB_PATH = v-usb/usbdrv/
+CC         = avr-gcc
+OBJCOPY    = avr-objcopy
+
+CFLAGS += -Wall -g -Os -mmcu=$(MCU) -DF_CPU=$(CLOCK)
 CFLAGS += -I $(V_USB_PATH)
-# I feel like this is an ugly hack, but it's needed in order to include usbconfig.h
+# FIXME: This is just to include usbconfig.h, would that be better off in a "config" directory?
 CFLAGS += -I $(PWD)
 
-SOURCE = usbremote.c nec.c
-SOURCE += $(V_USB_PATH)/usbdrv.c $(V_USB_PATH)/usbdrvasm.S $(V_USB_PATH)/oddebug.c
+V_USB_PATH = v-usb/usbdrv/
+V_USB = $(V_USB_PATH)/usbdrv.c $(V_USB_PATH)/usbdrvasm.S $(V_USB_PATH)/oddebug.c
 
-all: $(NAME).elf $(NAME).hex
+# NOTE: I'm not using $(NAME) here because I'm defining the dependencies for usbremote, not whatever NAME is specified on the commandline
+# FIXME: How do I make this depend on usbconfig.h without adding it to the build arguments?
+usbremote: $(V_USB) usbremote.c nec.c
 
-$(NAME).elf: $(SOURCE)
-	$(CC) $(CFLAGS) -o $(NAME).elf $(SOURCE)
+%.hex: %
+	$(OBJCOPY) -O ihex "$<" "$@"
 
-$(NAME).hex: usbremote.elf
-	$(OBJCOPY) -O ihex $(NAME).elf $(NAME).hex
+flash: $(NAME).hex
+	avrdude -c $(PROGRAMMER) -P $(PORT) -b $(BAUD) -p $(MCU) -U flash:w:$<
 
-flash: usbremote.hex
-	avrdude -c $(DRIVER) -p $(MCU) -U flash:w:$(NAME).hex
-
+# FIXME: Document these fuses
+#        Pretty sure it's just the atmega328p's defaults, with the clock value set to for a 20mhz external clock
 fuses:
-	avrdude -c $(DRIVER) -p $(MCU) -U lfuse:w:0xde:m -U hfuse:w:0xd9:m
+	avrdude -c $(PROGRAMMER) -P $(PORT) -b $(BAUD) -p $(MCU) -U lfuse:w:0xde:m -U hfuse:w:0xd9:m
 
 clean:
-	rm *.elf
-	rm *.hex
- 
+	# I suggest using "git clean -X" instead, this list clean never really gets kept up-to-date, but .gitignore does
+	-rm -v $(NAME) $(NAME).hex
+
+.DEFAULT_GOAL := $(NAME).hex

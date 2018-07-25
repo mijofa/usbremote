@@ -1,5 +1,3 @@
-#define F_CPU   20000000L
-
 #include <stdint.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
