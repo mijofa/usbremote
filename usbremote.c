@@ -55,7 +55,10 @@ ISR(TIMER1_OVF_vect)
 		cmd = nec_get_cmd();
 		addr = nec_get_addr();
 		nec_reset();
-	}
+        PORTB = 0b00000000;  // NOTE: This is probably done badly, I'm rudely turning off *all* pins on PORTB
+	} else {
+        PORTB = 0b00000010;  // NOTE: This is probably done badly, I'm rudely turning off *all* pins on PORTB
+    }
 
 	/* reset the timer. we really just need to reset the edge selector but this wont hurt  */
 	TCCR1B = _BV(CS11)   |  /* CLK/8 prescaler, meaning timer increment every CLK/8 Hz */
@@ -98,6 +101,8 @@ int main(void)
 
 	TIMSK1 |= _BV(TOIE1) | /* enable timer overflow interrupt */
 			 _BV(ICIE1);  /* enable input capture interrupt */
+
+    DDRB = 0b00000010;  // NOTE: This is probably done badly, I'm rudely just taking over DDRB, ignoring that the rest of the code (that I don't understand) might be doing with it
 
 	/* initialize decoder */
 	nec_init();
