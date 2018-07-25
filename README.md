@@ -48,6 +48,10 @@ FIXME: How well does this match the [V-USB reference circuit](https://www.obdev.
 Setup for mceusb protocol
 =========================
 
+Spec is documented here, I think: https://web.archive.org/web/20150920033111/http://download.microsoft.com/download/0/7/E/07EF37BB-33EA-4454-856A-7D663BC109DF/Windows-Media-Center-RC-IR-Collection-Green-Button-Specification-03-08-2011-V2.pdf
+I couldn't find a current link to that document (or a similar one) so I'm relying on archive.org for now.
+
+
 Get mceusb debug messages appearing in dmesg:
 
     sudo mount -t debugfs debugfs /mnt/dbg/
