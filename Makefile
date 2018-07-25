@@ -23,7 +23,8 @@ V_USB = $(V_USB_PATH)/usbdrv.c $(V_USB_PATH)/usbdrvasm.S $(V_USB_PATH)/oddebug.c
 
 # NOTE: I'm not using $(NAME) here because I'm defining the dependencies for usbremote, not whatever NAME is specified on the commandline
 # FIXME: How do I make this depend on usbconfig.h without adding it to the build arguments?
-usbremote: $(V_USB) usbremote.c nec.c
+usbremote: $(V_USB) nec.c
+usb-blink: $(V_USB)
 
 %.hex: %
 	$(OBJCOPY) -O ihex "$<" "$@"
