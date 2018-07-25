@@ -26,7 +26,7 @@ section at the end of this file).
 /* This is the port where the USB bus is connected. When you configure it to
  * "B", the registers PORTB, PINB and DDRB will be used.
  */
-#define USB_CFG_DMINUS_BIT      3
+#define USB_CFG_DMINUS_BIT      4
 /* This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
  * This may be any bit in the port.
  */
@@ -39,7 +39,7 @@ section at the end of this file).
  * interrupt, the USB interrupt will also be triggered at Start-Of-Frame
  * markers every millisecond.]
  */
-#define USB_CFG_CLOCK_KHZ       20000
+#define USB_CFG_CLOCK_KHZ       (F_CPU/1000)
 /* Clock rate of the AVR in kHz. Legal values are 12000, 12800, 15000, 16000,
  * 16500, 18000 and 20000. The 12.8 MHz and 16.5 MHz versions of the code
  * require no crystal, they tolerate +/- 1% deviation from the nominal
@@ -76,7 +76,7 @@ section at the end of this file).
  * default control endpoint 0 and an interrupt-in endpoint (any other endpoint
  * number).
  */
-#define USB_CFG_HAVE_INTRIN_ENDPOINT3   0 /* CHANGED FROM 0 to debug interrupt in endpoint*/
+#define USB_CFG_HAVE_INTRIN_ENDPOINT3   0
 /* Define this to 1 if you want to compile a version with three endpoints: The
  * default control endpoint 0, an interrupt-in endpoint 3 (or the number
  * configured below) and a catch-all default interrupt-in endpoint as above.
@@ -115,7 +115,7 @@ section at the end of this file).
 /* Define this to 1 if the device has its own power supply. Set it to 0 if the
  * device is powered from the USB bus.
  */
-#define USB_CFG_MAX_BUS_POWER           50
+#define USB_CFG_MAX_BUS_POWER           50  // Lower than the default of 100, but works, so not bothering to change it.
 /* Set this variable to the maximum USB bus power consumption of your device.
  * The value is in milliamperes. [It will be divided by two since USB
  * communicates power requirements in units of 2 mA.]
@@ -238,8 +238,8 @@ section at the end of this file).
 #define USB_CFG_DEVICE_VERSION  0x00, 0x01
 /* Version number of the device: Minor number first, then major number.
  */
-#define USB_CFG_VENDOR_NAME     'N', 'i', 'k', ' ', 'H', 'a', 'r', 'r', 'i', 's'
-#define USB_CFG_VENDOR_NAME_LEN 10
+#define USB_CFG_VENDOR_NAME     'c','y','b','e','r','.','c','o','m','.','a','u'
+#define USB_CFG_VENDOR_NAME_LEN 12
 /* These two values define the vendor name returned by the USB device. The name
  * must be given as a list of characters under single quotes. The characters
  * are interpreted as Unicode (UTF-16) entities.
